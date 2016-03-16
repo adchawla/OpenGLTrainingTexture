@@ -140,13 +140,15 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
 -(void) initGL {
     
     //set the clear color
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
     glClearDepthf(1.0);
     glEnable(GL_DEPTH_TEST);
 
     //enable texture mapping
     glEnable(GL_TEXTURE_2D);
     
+    glScissor(0, 510, 900, 110);
+    glEnable(GL_SCISSOR_TEST);
     //upload texture datat ot the GPU
     //textureID = [self loadTexture:@"image4.jpg"];
     

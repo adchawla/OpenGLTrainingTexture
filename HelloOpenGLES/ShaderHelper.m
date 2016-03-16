@@ -23,7 +23,7 @@ const char* V_SRC = ""
                     "   gl_Position = u_ProjectionMatrix * u_ModelMatrix * a_Position;                  \n"
                     "   v_Color = a_Color;                                                              \n"
                     "   v_TextureCoordinate = a_TextureCoordinate;                                      \n"
-                    "   v_distance = dot(gl_Position.xyz, u_clipPlane.xyz) + u_clipPlane.w;              \n"
+                    "   v_distance = 1.0; //dot(gl_Position.xyz, u_clipPlane.xyz) + u_clipPlane.w;              \n"
                     "}";
 
 const char* F_SRC = ""
