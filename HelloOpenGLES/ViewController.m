@@ -147,8 +147,8 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     //enable texture mapping
     glEnable(GL_TEXTURE_2D);
     
-    glScissor(0, 510, 900, 110);
-    glEnable(GL_SCISSOR_TEST);
+    //glScissor(0, 510, 900, 110);
+    //glEnable(GL_SCISSOR_TEST);
     //upload texture datat ot the GPU
     //textureID = [self loadTexture:@"image4.jpg"];
     
@@ -195,6 +195,8 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     //clear the color buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    glDisable(GL_DEPTH_TEST);
+    
     // Draw the Backgroud
     // 1. Switch to orthographic projection
     GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(-1.0, 1.0, -1.0, 1.0, 0.0, 1.0);
@@ -203,6 +205,7 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
     [self drawQuad];
 
+    glEnable(GL_DEPTH_TEST);
     
     // 2. Switch back to projection view
     float aspect = (float) self.view.bounds.size.width/(float)self.view.bounds.size.height;
@@ -210,7 +213,7 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
     
     modelMatrix = GLKMatrix4Identity;
-    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -30.0);
+    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -20.0);
     
     sunAngle += sunRotationIncrement;
     if (sunAngle >= 360.0) sunAngle = 0.0;

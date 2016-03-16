@@ -219,9 +219,9 @@ GLshort	*_texData=NULL;
 }
 -(bool)execute
 {
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CW);
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+    //glFrontFace(GL_CW);
     
     glEnableVertexAttribArray(m_PositionIndex);
     glEnableVertexAttribArray(m_ColorIndex);
