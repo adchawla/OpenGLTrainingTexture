@@ -23,6 +23,7 @@
     int textureCoordinateIndex;
     int activeTextureIndex;
     int textureID;
+    int clipPlaneIndex;
     
     float sunAngle;
     float earthOrbitAngle;

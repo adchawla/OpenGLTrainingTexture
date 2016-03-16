@@ -9,10 +9,10 @@
 #import "ViewController.h"
 
 
-float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
-                          -0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  0, 1,
-                           0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1, 0,
-                          -0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 0, 0};
+float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
+                          -1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  0, 1,
+                           1.0, -1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1, 0,
+                          -1.0, -1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0, 0};
 
 
 @interface ViewController ()
@@ -100,10 +100,25 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     activeTextureIndex = glGetUniformLocation(programObject, "activeTexture");
     modelMatrixIndex = glGetUniformLocation(programObject, "u_ModelMatrix");
     projectionMatrixIndex = glGetUniformLocation(programObject, "u_ProjectionMatrix");
+    clipPlaneIndex = glGetUniformLocation(programObject, "u_clipPlane");
+    
+    glUniform4f(clipPlaneIndex, 0.0, 1.0, 0.0, 0.0);
 
     sun = [[Planet alloc] init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"sun.jpg"];
     earth = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"earth.jpg"];
     moon = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"Moon.jpg"];
+    
+    // Load the background texture
+    NSError * error;
+    NSDictionary *options = @{GLKTextureLoaderOriginBottomLeft:@YES,
+                              GLKTextureLoaderGenerateMipmaps:@NO};
+    NSString * path = [[NSBundle mainBundle] pathForResource:@"stars.jpg" ofType:nil];
+    
+    backgroundTexture = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];
+    
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture.name);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     
     sunAngle = 0.0;
     sunRotationIncrement = 0.5;
@@ -129,12 +144,6 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     glClearDepthf(1.0);
     glEnable(GL_DEPTH_TEST);
 
-    
-    GLKMatrix4 projectionMatrix = GLKMatrix4Identity;
-    float aspect = (float) self.view.bounds.size.width/(float)self.view.bounds.size.height;
-    projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(45), aspect, 0.1, 100.0);
-    glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
-
     //enable texture mapping
     glEnable(GL_TEXTURE_2D);
     
@@ -151,7 +160,7 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     glActiveTexture(GL_TEXTURE0);
     
     //bind the textute to active texture unit 0
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture.name);
     
     //tell teh fragment shader that texture unit 0 is active
     glUniform1i(activeTextureIndex, 0);
@@ -184,7 +193,21 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     //clear the color buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    // Draw the Backgroud
+    // 1. Switch to orthographic projection
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(-1.0, 1.0, -1.0, 1.0, 0.0, 1.0);
+    glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
     GLKMatrix4 modelMatrix = GLKMatrix4Identity;
+    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
+    [self drawQuad];
+
+    
+    // 2. Switch back to projection view
+    float aspect = (float) self.view.bounds.size.width/(float)self.view.bounds.size.height;
+    projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(45), aspect, 0.1, 100.0);
+    glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
+    
+    modelMatrix = GLKMatrix4Identity;
     modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -30.0);
     
     sunAngle += sunRotationIncrement;
