@@ -97,7 +97,12 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     colorIndex = glGetAttribLocation(programObject, "a_Color");
     textureCoordinateIndex = glGetAttribLocation(programObject, "a_TextureCoordinate");
     activeTextureIndex = glGetUniformLocation(programObject, "activeTexture");
+    modelMatrixIndex = glGetUniformLocation(programObject, "u_ModelMatrix");
+    projectionMatrixIndex = glGetUniformLocation(programObject, "u_ProjectionMatrix");
 
+    sun = [[Planet alloc] init:50 slices:50 radius:1 squash:1 ProgramObject:programObject];
+    earth = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject];
+    moon = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject];
     
     //initialize OpenGL state
     [self initGL];
@@ -109,11 +114,16 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClearDepthf(1.0);
     
+    GLKMatrix4 projectionMatrix = GLKMatrix4Identity;
+    float aspect = (float) self.view.bounds.size.width/(float)self.view.bounds.size.height;
+    projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(45), aspect, 0.1, 100.0);
+    glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
+
     //enable texture mapping
     glEnable(GL_TEXTURE_2D);
     
     //upload texture datat ot the GPU
-    textureID = [self loadTexture:@"image4.jpg"];
+    //textureID = [self loadTexture:@"image4.jpg"];
     
     
     
@@ -154,11 +164,16 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
 
 -(void) glkView:(GLKView *)view drawInRect:(CGRect)rect {
     //rendering function'
-    
+
     //clear the color buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    [self drawQuad];
+    
+    GLKMatrix4 modelMatrix = GLKMatrix4Identity;
+    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -8.0);
+    
+    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
+    
+    [sun execute];
     
     //flush the opengl pipeline so that the commands get sent to the GPU
     glFlush();

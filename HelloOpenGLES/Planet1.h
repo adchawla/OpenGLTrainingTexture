@@ -19,10 +19,14 @@
 	GLfloat			m_Angle;
 	GLfloat			m_Pos[3];
 	GLfloat			m_RotationalIncrement;
+    
+    int             m_PositionIndex;
+    int             m_ColorIndex;
+    int             m_TextureIndex;
 }
 
 -(bool)execute;
--(id)init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius squash:(GLfloat)squash;
+-(id)init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius squash:(GLfloat)squash ProgramObject:(int) programObj;
 -(void)getPositionX:(GLfloat *)x Y:(GLfloat *)y Z:(GLfloat *)z;
 -(void)setPositionX:(GLfloat)x Y:(GLfloat)y Z:(GLfloat)z;
 -(GLfloat)getRotation;

@@ -12,7 +12,7 @@ Version: 2.0
 
 */
 
-#import "Planet.h"
+#import "Planet1.h"
 
 GLshort	*_texData=NULL;
 
@@ -20,13 +20,18 @@ GLshort	*_texData=NULL;
 
 
 
--(id)init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius squash:(GLfloat)squash 
+-(id)init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius squash:(GLfloat)squash ProgramObject:(int)programObj
 {    
     unsigned int colorIncrment=0;
     unsigned int blue=0;
     unsigned int red=255;
     int numVertices=0;
     
+    // get the index of the attribute named "a_Position"
+    m_PositionIndex = glGetAttribLocation(programObj, "a_Position");
+    m_ColorIndex = glGetAttribLocation(programObj, "a_Color");
+    m_TextureIndex = glGetAttribLocation(programObj, "a_TextureCoordinate");
+
     m_Scale=radius;
     m_Squash=squash;
     
@@ -57,14 +62,15 @@ GLshort	*_texData=NULL;
         malloc(sizeof(GLfloat) * 3 * ((m_Slices*2+2) * (m_Stacks)));
         
         GLfloat *tPtr=nil;                                          //3
-        
+
+        /*
         if(textureFile!=nil)
         {
             tPtr=m_TexCoordsData =
             (GLfloat *)malloc(sizeof(GLfloat) * 2 * ((m_Slices*2+2) *
                                                      (m_Stacks)));
         }
-        
+        */
         unsigned int phiIdx, thetaIdx;
         
         //latitude
@@ -201,21 +207,18 @@ GLshort	*_texData=NULL;
     glCullFace(GL_BACK);
     glFrontFace(GL_CW);
     
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableVertexAttribArray(m_PositionIndex);
+    glEnableVertexAttribArray(m_ColorIndex);
     
-    
-    glMatrixMode(GL_MODELVIEW);
-    
-    glVertexPointer(3, GL_FLOAT, 0, m_VertexData);
-    glNormalPointer(GL_FLOAT, 0, m_NormalData);
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, m_ColorData);
+    glVertexAttribPointer(m_PositionIndex, 3, GL_FLOAT, false, 0, m_VertexData);
+    glVertexAttribPointer(m_ColorIndex, 4, GL_UNSIGNED_BYTE, true, 0, m_ColorData);
+
     glDrawArrays(GL_TRIANGLE_STRIP, 0, (m_Slices+1)*2*(m_Stacks-1)+2);
     
+    glDisableVertexAttribArray(m_PositionIndex);
+    glDisableVertexAttribArray(m_ColorIndex);
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     
     return true;
 }
