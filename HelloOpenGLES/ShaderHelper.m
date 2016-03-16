@@ -27,10 +27,10 @@ const char* F_SRC = ""
                     "precision highp float;                    \n"
                     "varying vec4 v_Color;                      \n"
                     "varying vec2 v_TextureCoordinate;          \n"
-                    "uniform sampler2D activeTexture;          \n"
+                    "uniform sampler2D u_ActiveTexture;          \n"
                     "void main() {                              \n"
-                    "   vec4 textureColor = texture2D(activeTexture, v_TextureCoordinate);  \n"
-                    "   gl_FragColor = v_Color;    \n"
+                    "   vec4 textureColor = texture2D(u_ActiveTexture, v_TextureCoordinate);    \n"
+                    "   gl_FragColor = textureColor;                                            \n"
                     "}";
 
 

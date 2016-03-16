@@ -18,9 +18,21 @@ GLshort	*_texData=NULL;
 
 @implementation Planet
 
+-(GLKTextureInfo*) loadTextureFromFile:(NSString *)fileName {
+    NSError * error = nil;
+    NSDictionary* options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], GLKTextureLoaderOriginBottomLeft, nil];
+    
+    NSString * path = [[NSBundle mainBundle] pathForResource:fileName ofType:nil];
+    
+    m_TextureInfo = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];
+    
+    glBindTexture(GL_TEXTURE_2D, m_TextureInfo.name);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    return m_TextureInfo;
+}
 
-
--(id)init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius squash:(GLfloat)squash ProgramObject:(int)programObj
+-(id)init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius squash:(GLfloat)squash ProgramObject:(int)programObj TextureFileName:(NSString *)fileName
 {    
     unsigned int colorIncrment=0;
     unsigned int blue=0;
@@ -31,7 +43,10 @@ GLshort	*_texData=NULL;
     m_PositionIndex = glGetAttribLocation(programObj, "a_Position");
     m_ColorIndex = glGetAttribLocation(programObj, "a_Color");
     m_TextureIndex = glGetAttribLocation(programObj, "a_TextureCoordinate");
-
+    m_ActiveTextureIndex = glGetUniformLocation(programObj, "u_ActiveTexture");
+    //load texture
+    m_TextureInfo = [self loadTextureFromFile:fileName];
+    
     m_Scale=radius;
     m_Squash=squash;
     
@@ -63,14 +78,14 @@ GLshort	*_texData=NULL;
         
         GLfloat *tPtr=nil;                                          //3
 
-        /*
-        if(textureFile!=nil)
+        
+        if(fileName!=nil)
         {
             tPtr=m_TexCoordsData =
             (GLfloat *)malloc(sizeof(GLfloat) * 2 * ((m_Slices*2+2) *
                                                      (m_Stacks)));
         }
-        */
+        
         unsigned int phiIdx, thetaIdx;
         
         //latitude
@@ -209,14 +224,21 @@ GLshort	*_texData=NULL;
     
     glEnableVertexAttribArray(m_PositionIndex);
     glEnableVertexAttribArray(m_ColorIndex);
+    glEnableVertexAttribArray(m_TextureIndex);
     
     glVertexAttribPointer(m_PositionIndex, 3, GL_FLOAT, false, 0, m_VertexData);
     glVertexAttribPointer(m_ColorIndex, 4, GL_UNSIGNED_BYTE, true, 0, m_ColorData);
-
+    glVertexAttribPointer(m_TextureIndex, 2, GL_FLOAT, false, 0, m_TexCoordsData);
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_TextureInfo.name);
+    glUniform1i(m_ActiveTextureIndex, 0 );
+    
     glDrawArrays(GL_TRIANGLE_STRIP, 0, (m_Slices+1)*2*(m_Stacks-1)+2);
     
     glDisableVertexAttribArray(m_PositionIndex);
     glDisableVertexAttribArray(m_ColorIndex);
+    glDisableVertexAttribArray(m_TextureIndex);
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
     

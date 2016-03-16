@@ -100,9 +100,9 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     modelMatrixIndex = glGetUniformLocation(programObject, "u_ModelMatrix");
     projectionMatrixIndex = glGetUniformLocation(programObject, "u_ProjectionMatrix");
 
-    sun = [[Planet alloc] init:50 slices:50 radius:1 squash:1 ProgramObject:programObject];
-    earth = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject];
-    moon = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject];
+    sun = [[Planet alloc] init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"sun.jpg"];
+    earth = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"earth.jpg"];
+    moon = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"Moon.jpg"];
     
     //initialize OpenGL state
     [self initGL];

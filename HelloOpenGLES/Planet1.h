@@ -20,13 +20,17 @@
 	GLfloat			m_Pos[3];
 	GLfloat			m_RotationalIncrement;
     
+    GLKTextureInfo* m_TextureInfo;
+    
+    
     int             m_PositionIndex;
     int             m_ColorIndex;
     int             m_TextureIndex;
+    int             m_ActiveTextureIndex;
 }
 
 -(bool)execute;
--(id)init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius squash:(GLfloat)squash ProgramObject:(int) programObj;
+-(id)init:(GLint)stacks slices:(GLint)slices radius:(GLfloat)radius squash:(GLfloat)squash ProgramObject:(int) programObj TextureFileName:(NSString*) fileName;
 -(void)getPositionX:(GLfloat *)x Y:(GLfloat *)y Z:(GLfloat *)z;
 -(void)setPositionX:(GLfloat)x Y:(GLfloat)y Z:(GLfloat)z;
 -(GLfloat)getRotation;
@@ -34,5 +38,5 @@
 -(GLfloat)getRotationalIncrement;
 -(void)setRotationalIncrement:(GLfloat)inc;
 -(void)incrementRotation;
-
+-(GLKTextureInfo*) loadTextureFromFile:(NSString*)fileName;
 @end
