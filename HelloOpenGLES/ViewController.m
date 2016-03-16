@@ -18,9 +18,18 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
 @interface ViewController ()
 -(void) initGL;
 -(int) loadTexture:(NSString*) fileName;
+-(void) drawClipTriangle;
 @end
 
 @implementation ViewController
+
+-(void) drawClipTriangle {
+    float vertices[] = { 1.0, -1.0, 0.0, 0.0, 1.0, 0.0, -1.0, -1.0, 0.0 };
+    glEnableVertexAttribArray(positionIndex);
+    glVertexAttribPointer(positionIndex, 3, GL_FLOAT, false, 0, vertices);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDisableVertexAttribArray(positionIndex);
+}
 
 -(int) loadTexture:(NSString *)fileName {
     //generate the texture ID
@@ -76,6 +85,9 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     GLKView* view = (GLKView*)self.view;
     view.context = context;
     view.drawableDepthFormat = GLKViewDrawableDepthFormat16;
+    
+    // getting the stencil buffer
+    view.drawableStencilFormat = GLKViewDrawableStencilFormat8;
     
     //make the context current or bind to the context
     [EAGLContext setCurrentContext:context];
@@ -142,8 +154,11 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     //set the clear color
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClearDepthf(1.0);
+    glClearStencil(0.0);
+    
     glEnable(GL_DEPTH_TEST);
-
+    glEnable(GL_STENCIL_TEST);
+    
     //enable texture mapping
     glEnable(GL_TEXTURE_2D);
     
@@ -193,8 +208,8 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     //rendering function'
 
     //clear the color buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+ 
     glDisable(GL_DEPTH_TEST);
     
     // Draw the Backgroud
@@ -203,10 +218,23 @@ float quad_vertices[] = {  1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
     GLKMatrix4 modelMatrix = GLKMatrix4Identity;
     glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
+    // disable writing to the color buffer
+    glColorMask(false, false, false, false);
+    
+    // set up stencil function
+    glStencilFunc(GL_ALWAYS, 1, 1 );
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    [self drawClipTriangle];
+    
+    // enable writing to the color buffer
+    glColorMask(true, true, true, true);
+    // set up stencil test for quad
+    glStencilFunc(GL_EQUAL, 1, 1);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
     [self drawQuad];
 
     glEnable(GL_DEPTH_TEST);
-    
     // 2. Switch back to projection view
     float aspect = (float) self.view.bounds.size.width/(float)self.view.bounds.size.height;
     projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(45), aspect, 0.1, 100.0);
