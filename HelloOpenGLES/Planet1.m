@@ -20,8 +20,9 @@ GLshort	*_texData=NULL;
 
 -(GLKTextureInfo*) loadTextureFromFile:(NSString *)fileName {
     NSError * error = nil;
-    NSDictionary* options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], GLKTextureLoaderOriginBottomLeft, nil];
-    
+    //NSDictionary* options = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], GLKTextureLoaderOriginBottomLeft, nil];
+    NSDictionary *options = @{GLKTextureLoaderOriginBottomLeft:@YES,
+                              GLKTextureLoaderGenerateMipmaps:@NO};
     NSString * path = [[NSBundle mainBundle] pathForResource:fileName ofType:nil];
     
     m_TextureInfo = [GLKTextureLoader textureWithContentsOfFile:path options:options error:&error];

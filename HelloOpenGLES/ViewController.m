@@ -75,6 +75,7 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     //associate the context with the GLKView
     GLKView* view = (GLKView*)self.view;
     view.context = context;
+    view.drawableDepthFormat = GLKViewDrawableDepthFormat16;
     
     //make the context current or bind to the context
     [EAGLContext setCurrentContext:context];
@@ -104,6 +105,19 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     earth = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"earth.jpg"];
     moon = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"Moon.jpg"];
     
+    sunAngle = 0.0;
+    sunRotationIncrement = 0.5;
+    
+    earthAngle = 0.0;
+    earthOrbitAngle = 90.0;
+    earthRevolutionIncrement = 0.1;
+    earthRotationIncrement = 0.4;
+    
+    moonOrbitAngle = 180;
+    moonAngle = 0.0;
+    moonRevolutionIncrement = 0.5;
+    moonRotationIncrement = 1.0;
+    
     //initialize OpenGL state
     [self initGL];
 }
@@ -111,8 +125,10 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
 -(void) initGL {
     
     //set the clear color
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glClearDepthf(1.0);
+    glEnable(GL_DEPTH_TEST);
+
     
     GLKMatrix4 projectionMatrix = GLKMatrix4Identity;
     float aspect = (float) self.view.bounds.size.width/(float)self.view.bounds.size.height;
@@ -169,11 +185,26 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     GLKMatrix4 modelMatrix = GLKMatrix4Identity;
-    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -8.0);
+    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -30.0);
     
+    sunAngle += sunRotationIncrement;
+    if (sunAngle >= 360.0) sunAngle = 0.0;
+    
+    modelMatrix = GLKMatrix4Rotate(modelMatrix, GLKMathDegreesToRadians(sunAngle), 0, 1, 0);
     glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
-    
     [sun execute];
+    
+    modelMatrix = GLKMatrix4Translate(modelMatrix, 5.0, 0.0, 0.0);
+    modelMatrix = GLKMatrix4Scale(modelMatrix, 0.5, 0.5, 0.5);
+    modelMatrix = GLKMatrix4Rotate(modelMatrix, GLKMathDegreesToRadians(sunAngle+30), 0, 1, 0);
+    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
+    [earth execute];
+    
+    modelMatrix = GLKMatrix4Translate(modelMatrix, 1.5, 0.0, 0.0);
+    modelMatrix = GLKMatrix4Scale(modelMatrix, 0.25, 0.25, 0.25);
+    modelMatrix = GLKMatrix4Rotate(modelMatrix, GLKMathDegreesToRadians(sunAngle), 0, 1, 0);
+    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
+    [moon execute];
     
     //flush the opengl pipeline so that the commands get sent to the GPU
     glFlush();

@@ -24,9 +24,23 @@
     int activeTextureIndex;
     int textureID;
     
+    float sunAngle;
+    float earthOrbitAngle;
+    float earthAngle;
+    float moonOrbitAngle;
+    float moonAngle;
+    
+    float sunRotationIncrement;
+    float earthRevolutionIncrement;
+    float earthRotationIncrement;
+    float moonRevolutionIncrement;
+    float moonRotationIncrement;
+    
     Planet* sun;
     Planet* earth;
     Planet* moon;
+    
+    GLKTextureInfo* backgroundTexture;
 }
 
 
