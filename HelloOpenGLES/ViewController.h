@@ -20,13 +20,9 @@
     int colorIndex;
     int modelMatrixIndex;
     int projectionMatrixIndex;
-    int textureCoordinateIndex;
-    int activeTextureIndex;
-    int textureID;
     
-    Planet* sun;
-    Planet* earth;
-    Planet* moon;
+    NSMutableArray* points;
+    
 }
 
 

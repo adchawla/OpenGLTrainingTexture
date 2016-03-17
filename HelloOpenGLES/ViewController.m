@@ -75,6 +75,7 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     //associate the context with the GLKView
     GLKView* view = (GLKView*)self.view;
     view.context = context;
+    view.drawableDepthFormat = GLKViewDrawableDepthFormat16;
     
     //make the context current or bind to the context
     [EAGLContext setCurrentContext:context];
@@ -95,15 +96,16 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     //get the index for attribute named "a_Position"
     positionIndex = glGetAttribLocation(programObject, "a_Position");
     colorIndex = glGetAttribLocation(programObject, "a_Color");
-    textureCoordinateIndex = glGetAttribLocation(programObject, "a_TextureCoordinate");
-    activeTextureIndex = glGetUniformLocation(programObject, "activeTexture");
     modelMatrixIndex = glGetUniformLocation(programObject, "u_ModelMatrix");
     projectionMatrixIndex = glGetUniformLocation(programObject, "u_ProjectionMatrix");
-
-    sun = [[Planet alloc] init:50 slices:50 radius:1 squash:1 ProgramObject:programObject];
-    earth = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject];
-    moon = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject];
     
+    GLKMatrix4 projectionMatrix = GLKMatrix4MakeOrtho(0, self.view.frame.size.width, 0, self.view.frame.size.height, 0, 1);
+    glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
+    
+    
+    
+    points = [[NSMutableArray alloc] init];
+
     //initialize OpenGL state
     [self initGL];
 }
@@ -114,13 +116,8 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClearDepthf(1.0);
     
-    GLKMatrix4 projectionMatrix = GLKMatrix4Identity;
-    float aspect = (float) self.view.bounds.size.width/(float)self.view.bounds.size.height;
-    projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(45), aspect, 0.1, 100.0);
-    glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
-
     //enable texture mapping
-    glEnable(GL_TEXTURE_2D);
+//    glEnable(GL_TEXTURE_2D);
     
     //upload texture datat ot the GPU
     //textureID = [self loadTexture:@"image4.jpg"];
@@ -129,38 +126,57 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     
 }
 
--(void) drawQuad {
+//-(void) touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+//    
+//}
+
+-(void) touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    //get the touch point
+    UITouch* touch = [touches anyObject];
     
-    //make the texture unit 0 active
-    glActiveTexture(GL_TEXTURE0);
+    // get the location of touch in view coordinates system
+    CGPoint point = [touch locationInView:self.view];
     
-    //bind the textute to active texture unit 0
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    
-    //tell teh fragment shader that texture unit 0 is active
-    glUniform1i(activeTextureIndex, 0);
-    
-    //enable writing to the position variable
-    glEnableVertexAttribArray(positionIndex);
-    //enable writing to the color variable
-    glEnableVertexAttribArray(colorIndex);
-    glEnableVertexAttribArray(textureCoordinateIndex);
-    
-    
-    
-    glVertexAttribPointer(positionIndex, 3, GL_FLOAT, false, 36, quad_vertices);
-    glVertexAttribPointer(colorIndex, 4, GL_FLOAT, false, 36, quad_vertices + 3);
-    glVertexAttribPointer(textureCoordinateIndex, 2, GL_FLOAT, false, 36, quad_vertices + 7);
-    
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    
-    glDisableVertexAttribArray(positionIndex);
-    glDisableVertexAttribArray(colorIndex);
-    glDisableVertexAttribArray(textureCoordinateIndex);
-    
+    NSValue * value = [NSValue valueWithCGPoint:point];
+    [points addObject:value];
 }
 
+-(void) drawPoints {
+    // write a constant value for the color attribute
+    glVertexAttrib4f(colorIndex, 1.0, 0.0, 0.0, 1.0);
+    glEnableVertexAttribArray(positionIndex);
+    float verticesOfSquare[16];
+    for(NSValue* value in points) {
+        CGPoint point = [value CGPointValue];
+        float x = point.x;
+        float y = self.view.frame.size.height - point.y;
+        
+        verticesOfSquare[0] = x - 4;
+        verticesOfSquare[1] = y - 4;
+        verticesOfSquare[2] = 0.0;
+        verticesOfSquare[3] = 1.0;
+        
+        verticesOfSquare[4] = x + 4;
+        verticesOfSquare[5] = y - 4;
+        verticesOfSquare[6] = 0.0;
+        verticesOfSquare[7] = 1.0;
+        
+        verticesOfSquare[8] = x + 4;
+        verticesOfSquare[9] = y + 4;
+        verticesOfSquare[10] = 0.0;
+        verticesOfSquare[11] = 1.0;
+        
+        verticesOfSquare[12] = x - 4;
+        verticesOfSquare[13] = y + 4;
+        verticesOfSquare[14] = 0.0;
+        verticesOfSquare[15] = 1.0;
 
+        glVertexAttribPointer(positionIndex, 4, GL_FLOAT, false, 0, verticesOfSquare);
+        glDrawArrays(GL_LINE_LOOP, 0, 4);
+    }
+    glDisableVertexAttribArray(positionIndex);
+    
+}
 
 -(void) glkView:(GLKView *)view drawInRect:(CGRect)rect {
     //rendering function'
@@ -169,11 +185,9 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     GLKMatrix4 modelMatrix = GLKMatrix4Identity;
-    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -8.0);
-    
     glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
     
-    [sun execute];
+    [self drawPoints];
     
     //flush the opengl pipeline so that the commands get sent to the GPU
     glFlush();

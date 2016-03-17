@@ -7,11 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		463503891C9923ED00D18D3E /* earth.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 463503831C9923ED00D18D3E /* earth.jpg */; };
-		4635038A1C9923ED00D18D3E /* Moon.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 463503841C9923ED00D18D3E /* Moon.jpg */; };
 		4635038B1C9923ED00D18D3E /* Planet1.m in Sources */ = {isa = PBXBuildFile; fileRef = 463503861C9923ED00D18D3E /* Planet1.m */; };
-		4635038C1C9923ED00D18D3E /* stars.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 463503871C9923ED00D18D3E /* stars.jpg */; };
-		4635038D1C9923ED00D18D3E /* sun.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 463503881C9923ED00D18D3E /* sun.jpg */; };
 		890520011C969CB300666116 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 890520001C969CB300666116 /* main.m */; };
 		890520041C969CB300666116 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 890520031C969CB300666116 /* AppDelegate.m */; };
 		890520071C969CB300666116 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 890520061C969CB300666116 /* ViewController.m */; };
@@ -20,7 +16,6 @@
 		8905200F1C969CB300666116 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8905200D1C969CB300666116 /* LaunchScreen.storyboard */; };
 		890520171C969CDB00666116 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 890520161C969CDB00666116 /* GLKit.framework */; };
 		8905201F1C96B89000666116 /* ShaderHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 8905201E1C96B89000666116 /* ShaderHelper.m */; };
-		8905207B1C98300800666116 /* image4.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 890520771C982E8F00666116 /* image4.jpg */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -165,11 +160,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8905207B1C98300800666116 /* image4.jpg in Resources */,
-				463503891C9923ED00D18D3E /* earth.jpg in Resources */,
-				4635038C1C9923ED00D18D3E /* stars.jpg in Resources */,
-				4635038A1C9923ED00D18D3E /* Moon.jpg in Resources */,
-				4635038D1C9923ED00D18D3E /* sun.jpg in Resources */,
 				8905200F1C969CB300666116 /* LaunchScreen.storyboard in Resources */,
 				8905200C1C969CB300666116 /* Assets.xcassets in Resources */,
 				8905200A1C969CB300666116 /* Main.storyboard in Resources */,
