@@ -18,9 +18,101 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
 @interface ViewController ()
 -(void) initGL;
 -(int) loadTexture:(NSString*) fileName;
+-(GLuint) createOffscreenFrameBuffer;
+-(void) drawCubeToOffscreenFBO;
+-(void) drawCubeToOnscreenFBO;
 @end
 
 @implementation ViewController
+
+-(GLuint) createOffscreenFrameBuffer {
+
+    // generate ID for the frameBuffer
+    glGenFramebuffers(1, &offscreenFBOID);
+    
+    // bind to the framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, offscreenFBOID);
+    
+    // create a texture object which will be attached as color attachment 0.
+    glGenTextures(1, &offscreenTextureID);
+    glBindTexture(GL_TEXTURE_2D, offscreenTextureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+    // attach texture object to the frame buffer as color attachment 0
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, offscreenTextureID, 0);
+    
+    //create render buffer object and attach it to depth attachment point
+    GLuint rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 1024, 1024);
+    
+    // attach the render buffer object to the frame buffer object
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    
+    // check the status of frame buffer object
+    GLenum success = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if( success == GL_FRAMEBUFFER_COMPLETE) {
+        NSLog(@"Offscreen Frame Buffer setup correctly");
+    } else {
+        int error = glGetError();
+        NSLog(@"Offscreen FBO Failed with errorCode = %d", error);
+        return -1;
+    }
+    return offscreenFBOID;
+    
+}
+
+-(void) touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    [self drawCubeToOffscreenFBO];
+}
+
+-(void) drawCubeToOffscreenFBO {
+    // bind to the offscreen FBO
+    glBindFramebuffer(GL_FRAMEBUFFER, offscreenFBOID);
+    
+    glClearColor(0.5, 0.5, 0.5, 1.0);
+    glClearDepthf(1.0);
+    
+    // clear the color buffer and the depth buffer
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    
+    // set the view port as per the dimension of frame buffer object
+    glViewport(0, 0, 1024, 1024);
+    
+    GLKMatrix4 modelMatrix = GLKMatrix4Identity;
+    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -4);
+    modelMatrix = GLKMatrix4Rotate(modelMatrix, GLKMathDegreesToRadians(sunAngle), 1, 1, 1);
+    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
+  
+    glUniform1i(useTextureIndex, 0);
+    [cube draw];
+    
+    glFlush();
+}
+
+-(void) drawCubeToOnscreenFBO {
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    // bind to the onscreen FBO
+    // only for iOS to get back to the on screen buffer
+    GLKView* view = (GLKView*)self.view;
+    [view bindDrawable];
+    
+    // set the view port as per the dimension of screen
+    glViewport(0, 0, self.view.frame.size.width, self.view.frame.size.height);
+    
+    GLKMatrix4 modelMatrix = GLKMatrix4Identity;
+    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -4);
+    modelMatrix = GLKMatrix4Rotate(modelMatrix, GLKMathDegreesToRadians(sunAngle), 1, 1, 1);
+    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
+
+    glUniform1i(useTextureIndex, 0);
+    [cube draw];
+    
+    glFlush();
+}
 
 -(int) loadTexture:(NSString *)fileName {
     //generate the texture ID
@@ -100,41 +192,35 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     activeTextureIndex = glGetUniformLocation(programObject, "activeTexture");
     modelMatrixIndex = glGetUniformLocation(programObject, "u_ModelMatrix");
     projectionMatrixIndex = glGetUniformLocation(programObject, "u_ProjectionMatrix");
+    useTextureIndex = glGetUniformLocation(programObject, "u_UseTexture");
 
-    sun = [[Planet alloc] init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"sun.jpg"];
-    earth = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"earth.jpg"];
-    moon = [[Planet alloc]init:50 slices:50 radius:1 squash:1 ProgramObject:programObject TextureFileName:@"Moon.jpg"];
-    
+    GLKMatrix4 projectionMatrix = GLKMatrix4Identity;
+    float aspect = (float) self.view.bounds.size.width/(float)self.view.bounds.size.height;
+    projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(60), aspect, 0.1, 100.0);
+    glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
+
+    cube = [[Cube alloc]initWithProgramObject:programObject];
     sunAngle = 0.0;
     sunRotationIncrement = 0.5;
     
-    earthAngle = 0.0;
-    earthOrbitAngle = 90.0;
-    earthRevolutionIncrement = 0.1;
-    earthRotationIncrement = 0.4;
-    
-    moonOrbitAngle = 180;
-    moonAngle = 0.0;
-    moonRevolutionIncrement = 0.5;
-    moonRotationIncrement = 1.0;
+    [self createOffscreenFrameBuffer];
     
     //initialize OpenGL state
     [self initGL];
+    
+    [self drawCubeToOffscreenFBO];
+    glClearColor(1.0, 1.0, 1.0, 1.0 );
+
 }
 
 -(void) initGL {
     
     //set the clear color
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
     glClearDepthf(1.0);
     glEnable(GL_DEPTH_TEST);
 
     
-    GLKMatrix4 projectionMatrix = GLKMatrix4Identity;
-    float aspect = (float) self.view.bounds.size.width/(float)self.view.bounds.size.height;
-    projectionMatrix = GLKMatrix4MakePerspective(GLKMathDegreesToRadians(45), aspect, 0.1, 100.0);
-    glUniformMatrix4fv(projectionMatrixIndex, 1, false, projectionMatrix.m);
-
     //enable texture mapping
     glEnable(GL_TEXTURE_2D);
     
@@ -147,13 +233,23 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
 
 -(void) drawQuad {
     
+    glViewport(self.view.frame.size.width, self.view.frame.size.height, self.view.frame.size.width, self.view.frame.size.height);
+    
+    GLKMatrix4 modelMatrix = GLKMatrix4Identity;
+    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -5);
+    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
+    
+    glUniform1i(useTextureIndex, 1);
+    
     //make the texture unit 0 active
     glActiveTexture(GL_TEXTURE0);
     
     //bind the textute to active texture unit 0
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glBindTexture(GL_TEXTURE_2D, offscreenTextureID);
     
-    //tell teh fragment shader that texture unit 0 is active
+    //bind the
+    
+    //tell the fragment shader that texture unit 0 is active
     glUniform1i(activeTextureIndex, 0);
     
     //enable writing to the position variable
@@ -184,27 +280,11 @@ float quad_vertices[] = {  0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0,  1, 1,
     //clear the color buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    GLKMatrix4 modelMatrix = GLKMatrix4Identity;
-    modelMatrix = GLKMatrix4Translate(modelMatrix, 0, 0, -30.0);
-    
     sunAngle += sunRotationIncrement;
     if (sunAngle >= 360.0) sunAngle = 0.0;
     
-    modelMatrix = GLKMatrix4Rotate(modelMatrix, GLKMathDegreesToRadians(sunAngle), 0, 1, 0);
-    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
-    [sun execute];
-    
-    modelMatrix = GLKMatrix4Translate(modelMatrix, 5.0, 0.0, 0.0);
-    modelMatrix = GLKMatrix4Scale(modelMatrix, 0.5, 0.5, 0.5);
-    modelMatrix = GLKMatrix4Rotate(modelMatrix, GLKMathDegreesToRadians(sunAngle+30), 0, 1, 0);
-    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
-    [earth execute];
-    
-    modelMatrix = GLKMatrix4Translate(modelMatrix, 1.5, 0.0, 0.0);
-    modelMatrix = GLKMatrix4Scale(modelMatrix, 0.25, 0.25, 0.25);
-    modelMatrix = GLKMatrix4Rotate(modelMatrix, GLKMathDegreesToRadians(sunAngle), 0, 1, 0);
-    glUniformMatrix4fv(modelMatrixIndex, 1, false, modelMatrix.m);
-    [moon execute];
+    [self drawCubeToOnscreenFBO];
+    [self drawQuad];
     
     //flush the opengl pipeline so that the commands get sent to the GPU
     glFlush();

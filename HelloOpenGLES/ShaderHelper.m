@@ -24,13 +24,18 @@ const char* V_SRC = ""
                     "}";
 
 const char* F_SRC = ""
-                    "precision highp float;                    \n"
+                    "precision highp float;                     \n"
                     "varying vec4 v_Color;                      \n"
                     "varying vec2 v_TextureCoordinate;          \n"
-                    "uniform sampler2D u_ActiveTexture;          \n"
+                    "uniform sampler2D u_ActiveTexture;         \n"
+                    "uniform int u_UseTexture;                  \n"
                     "void main() {                              \n"
-                    "   vec4 textureColor = texture2D(u_ActiveTexture, v_TextureCoordinate);    \n"
-                    "   gl_FragColor = textureColor;                                            \n"
+                    "   if ( u_UseTexture != 0 ) {                                                  \n"
+                    "       vec4 textureColor = texture2D(u_ActiveTexture, v_TextureCoordinate);    \n"
+                    "       gl_FragColor = textureColor;                                            \n"
+                    "   } else {                                                                    \n"
+                    "       gl_FragColor = v_Color;                                                 \n"
+                    "   }                                                                           \n"
                     "}";
 
 

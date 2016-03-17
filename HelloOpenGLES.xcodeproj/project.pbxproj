@@ -12,6 +12,7 @@
 		4635038B1C9923ED00D18D3E /* Planet1.m in Sources */ = {isa = PBXBuildFile; fileRef = 463503861C9923ED00D18D3E /* Planet1.m */; };
 		4635038C1C9923ED00D18D3E /* stars.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 463503871C9923ED00D18D3E /* stars.jpg */; };
 		4635038D1C9923ED00D18D3E /* sun.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 463503881C9923ED00D18D3E /* sun.jpg */; };
+		46AE967B1C9A6E420085BE77 /* Cube.m in Sources */ = {isa = PBXBuildFile; fileRef = 46AE967A1C9A6E420085BE77 /* Cube.m */; };
 		890520011C969CB300666116 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 890520001C969CB300666116 /* main.m */; };
 		890520041C969CB300666116 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 890520031C969CB300666116 /* AppDelegate.m */; };
 		890520071C969CB300666116 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 890520061C969CB300666116 /* ViewController.m */; };
@@ -30,6 +31,8 @@
 		463503861C9923ED00D18D3E /* Planet1.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Planet1.m; sourceTree = "<group>"; };
 		463503871C9923ED00D18D3E /* stars.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = stars.jpg; sourceTree = "<group>"; };
 		463503881C9923ED00D18D3E /* sun.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sun.jpg; sourceTree = "<group>"; };
+		46AE96791C9A6E420085BE77 /* Cube.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cube.h; sourceTree = "<group>"; };
+		46AE967A1C9A6E420085BE77 /* Cube.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Cube.m; sourceTree = "<group>"; };
 		89051FFC1C969CB300666116 /* HelloOpenGLES.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HelloOpenGLES.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		890520001C969CB300666116 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		890520021C969CB300666116 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -79,6 +82,8 @@
 		89051FFE1C969CB300666116 /* HelloOpenGLES */ = {
 			isa = PBXGroup;
 			children = (
+				46AE96791C9A6E420085BE77 /* Cube.h */,
+				46AE967A1C9A6E420085BE77 /* Cube.m */,
 				463503831C9923ED00D18D3E /* earth.jpg */,
 				463503841C9923ED00D18D3E /* Moon.jpg */,
 				463503851C9923ED00D18D3E /* Planet1.h */,
@@ -187,6 +192,7 @@
 				890520071C969CB300666116 /* ViewController.m in Sources */,
 				4635038B1C9923ED00D18D3E /* Planet1.m in Sources */,
 				890520041C969CB300666116 /* AppDelegate.m in Sources */,
+				46AE967B1C9A6E420085BE77 /* Cube.m in Sources */,
 				890520011C969CB300666116 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
